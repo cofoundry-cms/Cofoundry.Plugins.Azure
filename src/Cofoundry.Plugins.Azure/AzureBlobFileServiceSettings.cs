@@ -9,6 +9,9 @@ namespace Cofoundry.Plugins.Azure
 {
     public class AzureBlobFileServiceSettings : PluginConfigurationSettingsBase
     {
+        /// <summary>
+        /// The connection string to use when accessing files in blob storage
+        /// </summary>
         public string ConnectionString { get; set; }
     }
 }
