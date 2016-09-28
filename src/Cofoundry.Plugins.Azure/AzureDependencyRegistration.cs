@@ -41,7 +41,7 @@ namespace Cofoundry.Plugins.Azure
         /// </remarks>
         public static bool AutoRegisterServices()
         {
-            return ConfigurationHelper.GetSettingAsBool("Cofoundry:Plugin:Azure:AutoRegisterServices", true);
+            return ConfigurationHelper.GetSettingAsBool("Cofoundry:Plugins:Azure:AutoRegisterServices", true);
         }
     }
 }
