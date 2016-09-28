@@ -22,7 +22,9 @@ namespace Cofoundry.Plugins.Azure
         private readonly CloudBlobClient _blobClient;
         private static ConcurrentDictionary<string, object> _initializedContainers = new ConcurrentDictionary<string, object>();
 
-        public AzureBlobFileService(AzureBlobFileServiceSettings settings)
+        public AzureBlobFileService(
+            AzureBlobFileServiceSettings settings
+            )
         {
             Condition.Requires(settings).IsNotNull();
 
