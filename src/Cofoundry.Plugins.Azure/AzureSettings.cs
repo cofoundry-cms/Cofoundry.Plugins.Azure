@@ -11,13 +11,13 @@ namespace Cofoundry.Plugins.Azure
     {
         public AzureSettings()
         {
-            AutoRegisterDependencies = true;
+            AutoRegisterServices = true;
         }
 
         /// <summary>
         /// Defaults to true. Indicates whether we want to auto-bootstrap azure services and run against the 
         /// azure infrastructure. Disable this in dev when you want to test locally.
         /// </summary>
-        public bool AutoRegisterDependencies { get; set; }
+        public bool AutoRegisterServices { get; set; }
     }
 }

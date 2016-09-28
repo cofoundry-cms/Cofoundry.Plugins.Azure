@@ -13,7 +13,12 @@ namespace Cofoundry.Plugins.Azure
     {
         public void Register(IContainerRegister container)
         {
-            if (AutoBootstrapServices())
+            container
+                .RegisterFactory<AzureBlobFileServiceSettings, ConfigurationSettingsFactory<AzureBlobFileServiceSettings>>()
+                .RegisterFactory<AzureSettings, ConfigurationSettingsFactory<AzureSettings>>()
+                ;
+
+            if (AutoRegisterServices())
             {
                 var delayedRegistrationOptions = new RegistrationOptions()
                 {
@@ -22,8 +27,6 @@ namespace Cofoundry.Plugins.Azure
                 };
 
                 container
-                    .RegisterFactory<AzureBlobFileServiceSettings, ConfigurationSettingsFactory<AzureBlobFileServiceSettings>>()
-                    .RegisterFactory<AzureSettings, ConfigurationSettingsFactory<AzureSettings>>()
                     .RegisterType<IFileStoreService, AzureBlobFileService>(delayedRegistrationOptions)
                     ;
             }
@@ -36,9 +39,9 @@ namespace Cofoundry.Plugins.Azure
         /// <remarks>
         /// Publicly exposed setting so it can be used in other Azure dependency registrations.
         /// </remarks>
-        public static bool AutoBootstrapServices()
+        public static bool AutoRegisterServices()
         {
-            return ConfigurationHelper.GetSettingAsBool("Cofoundry:Plugin:Azure:AutoRegisterDependencies", true);
+            return ConfigurationHelper.GetSettingAsBool("Cofoundry:Plugin:Azure:AutoRegisterServices", true);
         }
     }
 }
