@@ -44,7 +44,7 @@ Task("Patch-Assembly-Version")
         UpdateAssemblyInfo = false
     });
 
-    Information("Buildin version {0} of Cofoundry.Plugins.Azure.", versionInfo.InformationalVersion);
+    Information("Building version {0} of Cofoundry.Plugins.Azure.", versionInfo.InformationalVersion);
 
     isPrerelease = !string.IsNullOrEmpty(versionInfo.PreReleaseNumber);
 
