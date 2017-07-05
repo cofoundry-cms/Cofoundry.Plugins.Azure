@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cofoundry.Plugins.Azure", "Cofoundry.Plugins.Azure\Cofoundry.Plugins.Azure.csproj", "{23CE3B8F-15D0-48BD-9DBF-D4C40A990469}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cofoundry.Plugins.Azure", "Cofoundry.Plugins.Azure\Cofoundry.Plugins.Azure.csproj", "{47B6C7FF-D712-4C6D-8401-13F1FF522F52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{23CE3B8F-15D0-48BD-9DBF-D4C40A990469}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23CE3B8F-15D0-48BD-9DBF-D4C40A990469}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23CE3B8F-15D0-48BD-9DBF-D4C40A990469}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23CE3B8F-15D0-48BD-9DBF-D4C40A990469}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47B6C7FF-D712-4C6D-8401-13F1FF522F52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47B6C7FF-D712-4C6D-8401-13F1FF522F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47B6C7FF-D712-4C6D-8401-13F1FF522F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47B6C7FF-D712-4C6D-8401-13F1FF522F52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

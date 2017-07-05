@@ -13,7 +13,6 @@ namespace Cofoundry.Plugins.Azure
         /// <summary>
         /// The connection string to use when accessing files in blob storage
         /// </summary>
-        [Required]
         public string ConnectionString { get; set; }
     }
 }
