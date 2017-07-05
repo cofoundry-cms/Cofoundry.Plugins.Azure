@@ -15,8 +15,8 @@ This library contains services, abstractions and helpers for running in an Azure
 
 ## Settings
 
-- **Cofoundry:Plugins:AzureBlobFileService:ConnectionString** The connection string to use when accessing files in blob storage
-- **Cofoundry:Plugins:Azure:AutoRegisterServices:** Indicates whether to automatically register azure services. Defaults to true, but you may want to set this as false if developing locally 
+- **Cofoundry:Plugins:Azure:BlobStorageConnectionString** The connection string to use when accessing files in blob storage.
+- **Cofoundry:Plugins:Azure:Disabled:** Indicates whether the plugin should be disabled, which means services will not be bootstrapped. Disable this in dev when you want to run using the standard non-cloud services. Defaults to false.
 
 
 

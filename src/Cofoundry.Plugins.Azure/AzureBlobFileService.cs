@@ -25,17 +25,17 @@ namespace Cofoundry.Plugins.Azure
         private static ConcurrentBag<string> _initializedContainers2 = new ConcurrentBag<string>();
 
         public AzureBlobFileService(
-            AzureBlobFileServiceSettings settings
+            AzureSettings settings
             )
         {
             if (settings == null) throw new ArgumentNullException(nameof(settings));
 
-            if (string.IsNullOrWhiteSpace(settings.ConnectionString))
+            if (string.IsNullOrWhiteSpace(settings.BlobStorageConnectionString))
             {
-                throw new InvalidConfigurationException(typeof(AzureBlobFileServiceSettings), "The ConnectionString is required to use the AzureBlobFileService");
+                throw new InvalidConfigurationException(typeof(AzureSettings), "The BlobStorageConnectionString is required to use the AzureBlobFileService");
             }
 
-            var storageAccount = CloudStorageAccount.Parse(settings.ConnectionString);
+            var storageAccount = CloudStorageAccount.Parse(settings.BlobStorageConnectionString);
             _blobClient = storageAccount.CreateCloudBlobClient();
         }
 

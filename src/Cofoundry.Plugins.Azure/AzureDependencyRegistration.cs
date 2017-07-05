@@ -14,11 +14,6 @@ namespace Cofoundry.Plugins.Azure
     {
         public void Register(IContainerRegister container)
         {
-            container
-                .RegisterFactory<AzureBlobFileServiceSettings, ConfigurationSettingsFactory<AzureBlobFileServiceSettings>>()
-                .RegisterFactory<AzureSettings, ConfigurationSettingsFactory<AzureSettings>>()
-                ;
-
             if (container.Configuration.IsAzurePluginEnabled())
             {
                 var delayedRegistrationOptions = RegistrationOptions.Override();
