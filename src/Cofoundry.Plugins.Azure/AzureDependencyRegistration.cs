@@ -1,7 +1,5 @@
-﻿using Cofoundry.Core.Configuration;
-using Cofoundry.Core.DependencyInjection;
+﻿using Cofoundry.Core.DependencyInjection;
 using Cofoundry.Domain.Data;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
