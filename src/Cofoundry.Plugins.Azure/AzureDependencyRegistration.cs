@@ -14,10 +14,10 @@ namespace Cofoundry.Plugins.Azure
         {
             if (container.Configuration.IsAzurePluginEnabled())
             {
-                var delayedRegistrationOptions = RegistrationOptions.Override();
+                var overrideOptions = RegistrationOptions.Override();
 
                 container
-                    .RegisterType<IFileStoreService, AzureBlobFileService>(delayedRegistrationOptions)
+                    .Register<IFileStoreService, AzureBlobFileService>(overrideOptions)
                     ;
             }
         }
