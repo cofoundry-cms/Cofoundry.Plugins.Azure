@@ -22,7 +22,6 @@ namespace Cofoundry.Plugins.Azure
 
         private readonly CloudBlobClient _blobClient;
         private static ConcurrentDictionary<string, byte> _initializedContainers = new ConcurrentDictionary<string, byte>();
-        private static ConcurrentBag<string> _initializedContainers2 = new ConcurrentBag<string>();
 
         public AzureBlobFileService(
             AzureSettings settings
@@ -44,11 +43,11 @@ namespace Cofoundry.Plugins.Azure
         #region public methods
 
         /// <summary>
-        /// Determins if the specified file exists in the container
+        /// Determins if the specified file exists in the container.
         /// </summary>
-        /// <param name="containerName">The name of the container to look for the filew</param>
-        /// <param name="fileName">Name of the file to look for</param>
-        /// <returns>True if the file exists; otherwise false</returns>
+        /// <param name="containerName">The name of the container to look for the file.</param>
+        /// <param name="fileName">Name of the file to look for.</param>
+        /// <returns>True if the file exists; otherwise false.</returns>
         public async Task<bool> ExistsAsync(string containerName, string fileName)
         {
             var container = await GetBlobContainerAsync(containerName);
