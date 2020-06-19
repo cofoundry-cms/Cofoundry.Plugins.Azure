@@ -1,7 +1,7 @@
 ﻿using Cofoundry.Core.Configuration;
 using Cofoundry.Domain.Data;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage;
+using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
