@@ -1,5 +1,6 @@
 ﻿using Cofoundry.Core.DependencyInjection;
 using Cofoundry.Domain.Data;
+using Cofoundry.Plugins.Azure.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;

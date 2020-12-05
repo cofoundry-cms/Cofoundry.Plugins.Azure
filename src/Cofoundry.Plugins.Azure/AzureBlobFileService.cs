@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Cofoundry.Plugins.Azure
+namespace Cofoundry.Plugins.Azure.Internal
 {
     /// <summary>
     /// File system abstraction for Azure blob storage
@@ -41,6 +41,11 @@ namespace Cofoundry.Plugins.Azure
         #endregion
 
         #region public methods
+
+        public BlobServiceClient GetServiceClient()
+        {
+            return _blobServiceClient;
+        }
 
         /// <summary>
         /// Determins if the specified file exists in the container.
