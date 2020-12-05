@@ -1,7 +1,8 @@
-﻿using Cofoundry.Core.Configuration;
+﻿using Azure;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Cofoundry.Core.Configuration;
 using Cofoundry.Domain.Data;
-using Microsoft.Azure.Storage;
-using Microsoft.Azure.Storage.Blob;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Cofoundry.Plugins.Azure
     {
         #region constructor 
 
-        private readonly CloudBlobClient _blobClient;
+        private readonly BlobServiceClient _blobServiceClient;
         private static ConcurrentDictionary<string, byte> _initializedContainers = new ConcurrentDictionary<string, byte>();
 
         public AzureBlobFileService(
@@ -31,11 +32,10 @@ namespace Cofoundry.Plugins.Azure
 
             if (string.IsNullOrWhiteSpace(settings.BlobStorageConnectionString))
             {
-                throw new InvalidConfigurationException(typeof(AzureSettings), "The BlobStorageConnectionString is required to use the AzureBlobFileService");
+                throw new InvalidConfigurationException(typeof(AzureSettings), $"The {nameof(settings.BlobStorageConnectionString)} setting is required to use the {nameof(AzureBlobFileService)}");
             }
 
-            var storageAccount = CloudStorageAccount.Parse(settings.BlobStorageConnectionString);
-            _blobClient = storageAccount.CreateCloudBlobClient();
+            _blobServiceClient = new BlobServiceClient(settings.BlobStorageConnectionString); 
         }
 
         #endregion
@@ -51,9 +51,9 @@ namespace Cofoundry.Plugins.Azure
         public async Task<bool> ExistsAsync(string containerName, string fileName)
         {
             var container = await GetBlobContainerAsync(containerName);
-            var blockBlob = container.GetBlockBlobReference(fileName);
+            var blobClient = container.GetBlobClient(fileName);
 
-            return await blockBlob.ExistsAsync();
+            return await blobClient.ExistsAsync();
         }
 
         /// <summary>
@@ -65,22 +65,16 @@ namespace Cofoundry.Plugins.Azure
         public async Task<Stream> GetAsync(string containerName, string fileName)
         {
             var container = await GetBlobContainerAsync(containerName);
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
-            Stream stream = null;
+            var blobClient = container.GetBlobClient(fileName);
 
             try
             {
-                return await blockBlob.OpenReadAsync();
+                return await blobClient.OpenReadAsync();
             }
-            catch (StorageException ex)
+            catch (RequestFailedException ex) when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
             {
-                if (ex.RequestInformation.HttpStatusCode != 404)
-                {
-                    throw;
-                }
+                return null;
             }
-
-            return stream;
         }
 
         /// <summary>
@@ -97,13 +91,13 @@ namespace Cofoundry.Plugins.Azure
         public  async Task CreateOrReplaceAsync(string containerName, string fileName, Stream stream)
         {
             var container = await GetBlobContainerAsync(containerName);
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
+            var blockClient = container.GetBlobClient(fileName);
 
             if (stream.Position != 0)
             {
                 stream.Position = 0;
             }
-            await blockBlob.UploadFromStreamAsync(stream);
+            await blockClient.UploadAsync(stream, true);
         }
 
         /// <summary>
@@ -122,8 +116,9 @@ namespace Cofoundry.Plugins.Azure
         public async Task DeleteAsync(string containerName, string fileName)
         {
             var container = await GetBlobContainerAsync(containerName);
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(fileName);
-            await blockBlob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, null, null, null);
+            var blockBlob = container.GetBlobClient(fileName);
+
+            await blockBlob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
         }
 
         /// <summary>
@@ -134,22 +129,15 @@ namespace Cofoundry.Plugins.Azure
         public async Task DeleteDirectoryAsync(string containerName, string directoryName)
         {
             var container = await GetBlobContainerAsync(containerName);
-            var directory = container.GetDirectoryReference(directoryName);
 
-            BlobContinuationToken continuationToken = null;
-            var blobs = new List<IListBlobItem>();
+            var blobs = new List<BlobItem>();
 
-            do
+            await foreach (var item in container.GetBlobsAsync(BlobTraits.None, BlobStates.None, directoryName))
             {
-                // each segment is max 5000 items
-                var segment = await directory.ListBlobsSegmentedAsync(true, BlobListingDetails.None, null, continuationToken, null, null);
-                continuationToken = segment.ContinuationToken;
-                blobs.AddRange(segment.Results);
-
+                blobs.Add(item);
             }
-            while (continuationToken != null);
 
-            await DeleteBlobsAsync(blobs);
+            await DeleteBlobsAsync(container, blobs);
         }
 
         /// <summary>
@@ -170,54 +158,36 @@ namespace Cofoundry.Plugins.Azure
         {
             var container = await GetBlobContainerAsync(containerName);
 
-            BlobContinuationToken continuationToken = null;
-            var blobs = new List<IListBlobItem>();
+            var blobs = new List<BlobItem>();
 
-            do
+            await foreach (var item in container.GetBlobsAsync())
             {
-                // each segment is max 5000 items
-                var segment = await container.ListBlobsSegmentedAsync(null, true, BlobListingDetails.None, null, continuationToken, null, null);
-                continuationToken = segment.ContinuationToken;
-                blobs.AddRange(segment.Results);
-
+                blobs.Add(item);
             }
-            while (continuationToken != null);
 
-            await DeleteBlobsAsync(blobs);
+            await DeleteBlobsAsync(container, blobs);
         }
 
         #endregion
 
         #region privates
 
-        private async Task DeleteBlobsAsync(IEnumerable<IListBlobItem> blobs)
+        private async Task DeleteBlobsAsync(BlobContainerClient container, IEnumerable<BlobItem> blobs)
         {
             foreach (var blobItem in blobs)
             {
-                var blockBlob = blobItem as CloudBlockBlob;
-                if (blockBlob != null)
-                {
-                    await blockBlob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, null, null, null);
-                }
-                else
-                {
-                    var pageBlob = blobItem as CloudPageBlob;
-                    if (pageBlob != null)
-                    {
-                        await pageBlob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, null, null, null);
-                    }
-                }
+                await container.DeleteBlobIfExistsAsync(blobItem.Name, DeleteSnapshotsOption.IncludeSnapshots);
             }
         }
 
         private async Task CreateAsync(string containerName, string fileName, Stream stream, bool throwExceptionIfNotExists)
         {
             var container = await GetBlobContainerAsync(containerName);
-            var blockBlob = container.GetBlockBlobReference(fileName);
+            var blobClient = container.GetBlobClient(fileName);
 
             // Don't overwrite:
             // http://stackoverflow.com/a/14938608/716689
-            var accessCondition = AccessCondition.GenerateIfNotExistsCondition();
+            //var accessCondition = AccessCondition.GenerateIfNotExistsCondition();
 
             try
             {
@@ -226,25 +196,22 @@ namespace Cofoundry.Plugins.Azure
                     stream.Position = 0;
                 }
 
-                await blockBlob.UploadFromStreamAsync(stream, accessCondition, null, null);
+                await blobClient.UploadAsync(stream);
+                //await blobClient.UploadFromStreamAsync(stream, accessCondition, null, null);
             }
-            catch (StorageException ex)
+            catch (RequestFailedException ex) when (ex.ErrorCode == BlobErrorCode.BlobAlreadyExists)
             {
-                if (ex.RequestInformation.HttpStatusCode == 409)
+                if (throwExceptionIfNotExists)
                 {
-                    if (throwExceptionIfNotExists) throw new InvalidOperationException("File already exists", ex);
-                }
-                else
-                {
-                    throw;
+                    throw new InvalidOperationException("File already exists", ex);
                 }
             }
         }
 
-        private async Task<CloudBlobContainer> GetBlobContainerAsync(string containerName)
+        private async Task<BlobContainerClient> GetBlobContainerAsync(string containerName)
         {
             containerName = containerName.ToLower();
-            var container = _blobClient.GetContainerReference(containerName);
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
 
             // initalize container
             if (_initializedContainers.TryAdd(containerName, 0))
