@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    
-    <PackageId>Cofoundry.Plugins.Azure</PackageId>
+    <TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+
+	<PackageId>Cofoundry.Plugins.Azure</PackageId>
     <Description>Services, abstractions and helpers for running in an Azure environment.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>Copyright © Cofoundry.org</Copyright>
@@ -11,13 +12,13 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netcoreapp3.1\Cofoundry.Plugins.Azure.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\net6.0\Cofoundry.Plugins.Azure.xml</DocumentationFile>
     <NoWarn>1701;1702;1705;1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.13.0" />
-    <PackageReference Include="Cofoundry.Domain" Version="0.10.3" />
+    <PackageReference Include="Cofoundry.Domain" Version="0.10.4-ci0006" />
   </ItemGroup>
 
 </Project>
