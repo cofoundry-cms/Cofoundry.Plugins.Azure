@@ -1,7 +1,8 @@
-﻿using Cofoundry.Core;
+using System.Globalization;
+using System.Text;
+using Cofoundry.Core;
 using Cofoundry.Plugins.Azure.Internal;
 using Microsoft.Extensions.Configuration;
-using System.Text;
 using Xunit;
 
 namespace Cofoundry.Plugins.Azure.Tests;
@@ -9,6 +10,7 @@ namespace Cofoundry.Plugins.Azure.Tests;
 public class AzureBlobFileServiceTests : IAsyncLifetime
 {
     private readonly AzureSettings _azureSettings;
+    private static readonly string TEST_RUN_ID = DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture);
 
     public AzureBlobFileServiceTests()
     {
@@ -44,13 +46,13 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         var uniqueData = MakeContainerName(nameof(ClearContainer_IfMultipleFile_DoesClear));
         var containerName = uniqueData;
         var directoryName = "sub/";
-        string fileName = GetFileName(uniqueData);
-        int numFiles = 5;
+        var fileName = GetFileName(uniqueData);
+        var numFiles = 5;
 
         var service = CreateFileStoreService();
 
         // Setup files
-        for (int i = 1; i < numFiles; i++)
+        for (var i = 1; i < numFiles; i++)
         {
             // in root
             using (var stream = GetFileStream(containerName))
@@ -71,7 +73,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
 
         // Assert
 
-        for (int i = 1; i < numFiles; i++)
+        for (var i = 1; i < numFiles; i++)
         {
             var exists = await service.ExistsAsync(containerName, fileName + i);
             Assert.False(exists);
@@ -100,13 +102,13 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         var uniqueData = MakeContainerName(nameof(ClearDirectory_IfMultipleFile_DoesClear) + testIteration);
         var containerName = uniqueData;
         var formattedDirectoryName = directoryName.Trim('/') + '/';
-        string fileName = GetFileName(uniqueData);
-        int numFiles = 5;
+        var fileName = GetFileName(uniqueData);
+        var numFiles = 5;
 
         var service = CreateFileStoreService();
 
         // Setup files
-        for (int i = 1; i < numFiles; i++)
+        for (var i = 1; i < numFiles; i++)
         {
             // in root
             using (var stream = GetFileStream(containerName))
@@ -127,7 +129,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
 
         // Assert
 
-        for (int i = 1; i < numFiles; i++)
+        for (var i = 1; i < numFiles; i++)
         {
             var exists = await service.ExistsAsync(containerName, fileName + i);
             Assert.True(exists);
@@ -139,7 +141,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
     [Fact]
     public async Task CreateAsync_IfNotExists_DoesNotThrow()
     {
-        var uniqueData = MakeContainerName(nameof(ExistsAsync_IfNotExists_ReturnsFalse));
+        var uniqueData = MakeContainerName(nameof(CreateAsync_IfNotExists_DoesNotThrow));
         var fileName = GetFileName(uniqueData);
 
         var service = CreateFileStoreService();
@@ -156,7 +158,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
     public async Task CreateAsync_IfExists_Throws()
     {
         var uniqueData = MakeContainerName(nameof(CreateAsync_IfExists_Throws));
-        string fileName = GetFileName(uniqueData);
+        var fileName = GetFileName(uniqueData);
 
         var service = CreateFileStoreService();
         using (var stream = GetFileStream(uniqueData))
@@ -195,7 +197,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
     public async Task CreateIfNotExistsAsync_IfExists_DoesNotCreate()
     {
         var uniqueData = MakeContainerName(nameof(CreateIfNotExistsAsync_IfExists_DoesNotCreate));
-        string fileName = GetFileName(uniqueData);
+        var fileName = GetFileName(uniqueData);
 
         var service = CreateFileStoreService();
         var file1Text = uniqueData + "file1";
@@ -214,12 +216,14 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         }
 
         byte[] savedFileBytes;
-        using (var savedFileStream = await service.GetAsync(uniqueData, fileName))
-        using (var memoryStream = new MemoryStream())
+        using var savedFileStream = await service.GetAsync(uniqueData, fileName);
+        using var memoryStream = new MemoryStream();
+
+        if (savedFileStream != null)
         {
             await savedFileStream.CopyToAsync(memoryStream);
-            savedFileBytes = memoryStream.ToArray();
         }
+        savedFileBytes = memoryStream.ToArray();
 
         Assert.Equal(file1Bytes, savedFileBytes);
     }
@@ -244,7 +248,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
     public async Task CreateOrReplaceAsync_IfExists_Replaces()
     {
         var uniqueData = MakeContainerName(nameof(CreateOrReplaceAsync_IfExists_Replaces));
-        string fileName = GetFileName(uniqueData);
+        var fileName = GetFileName(uniqueData);
 
         var service = CreateFileStoreService();
         var file1Text = uniqueData + "file1";
@@ -263,12 +267,14 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         }
 
         byte[] savedFileBytes;
-        using (var savedFileStream = await service.GetAsync(uniqueData, fileName))
-        using (var memoryStream = new MemoryStream())
+        using var savedFileStream = await service.GetAsync(uniqueData, fileName);
+        using var memoryStream = new MemoryStream();
+
+        if (savedFileStream != null)
         {
             await savedFileStream.CopyToAsync(memoryStream);
-            savedFileBytes = memoryStream.ToArray();
         }
+        savedFileBytes = memoryStream.ToArray();
 
         Assert.Equal(file2Bytes, savedFileBytes);
     }
@@ -311,12 +317,12 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         var uniqueData = MakeContainerName(nameof(DeleteDirectory_IfMultipleFile_DoesClear) + testIteration);
         var containerName = uniqueData;
         var formattedDirectoryName = directoryName.Trim('/') + '/';
-        string fileName = GetFileName(uniqueData);
-        int numFiles = 5;
+        var fileName = GetFileName(uniqueData);
+        var numFiles = 5;
 
         var service = CreateFileStoreService();
         // Setup files
-        for (int i = 1; i < numFiles; i++)
+        for (var i = 1; i < numFiles; i++)
         {
             // in root
             using (var stream = GetFileStream(containerName))
@@ -337,7 +343,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
 
         // Assert
 
-        for (int i = 1; i < numFiles; i++)
+        for (var i = 1; i < numFiles; i++)
         {
             var exists = await service.ExistsAsync(containerName, fileName + i);
             Assert.True(exists);
@@ -390,12 +396,14 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
             fileBytes = stream.ToArray();
 
             byte[] savedFileBytes;
-            using (var savedFileStream = await service.GetAsync(uniqueData, fileName))
-            using (var memoryStream = new MemoryStream())
+            using var savedFileStream = await service.GetAsync(uniqueData, fileName);
+            using var memoryStream = new MemoryStream();
+
+            if (savedFileStream != null)
             {
                 await savedFileStream.CopyToAsync(memoryStream);
-                savedFileBytes = memoryStream.ToArray();
             }
+            savedFileBytes = memoryStream.ToArray();
 
             Assert.Equal(fileBytes, savedFileBytes);
         }
@@ -414,9 +422,9 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         }
     }
 
-    private string MakeContainerName(string uniqueData)
+    private static string MakeContainerName(string uniqueData)
     {
-        return SlugFormatter.ToSlug(uniqueData).Replace("-", "");
+        return SlugFormatter.ToSlug(uniqueData).Replace("-", "") + TEST_RUN_ID;
     }
 
     private AzureBlobFileService CreateFileStoreService()
@@ -433,7 +441,7 @@ public class AzureBlobFileServiceTests : IAsyncLifetime
         return stream;
     }
 
-    private string GetFileName(string uniqueData)
+    private static string GetFileName(string uniqueData)
     {
         return Path.ChangeExtension(uniqueData, "txt");
     }

@@ -1,4 +1,4 @@
-﻿using Cofoundry.Core.Configuration;
+using Cofoundry.Core.Configuration;
 
 namespace Cofoundry.Plugins.Azure;
 
@@ -14,5 +14,5 @@ public class AzureSettings : PluginConfigurationSettingsBase
     /// <summary>
     /// The connection string to use when accessing files in blob storage
     /// </summary>
-    public string BlobStorageConnectionString { get; set; }
+    public string? BlobStorageConnectionString { get; set; }
 }

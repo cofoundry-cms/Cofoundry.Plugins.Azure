@@ -1,9 +1,9 @@
-﻿using Azure;
+using System.Collections.Concurrent;
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Cofoundry.Core.Configuration;
 using Cofoundry.Domain.Data;
-using System.Collections.Concurrent;
 
 namespace Cofoundry.Plugins.Azure.Internal;
 
@@ -13,13 +13,13 @@ namespace Cofoundry.Plugins.Azure.Internal;
 public class AzureBlobFileService : IFileStoreService
 {
     private readonly BlobServiceClient _blobServiceClient;
-    private static ConcurrentDictionary<string, byte> _initializedContainers = new ConcurrentDictionary<string, byte>();
+    private static readonly ConcurrentDictionary<string, byte> _initializedContainers = new();
 
     public AzureBlobFileService(
         AzureSettings settings
         )
     {
-        if (settings == null) throw new ArgumentNullException(nameof(settings));
+        ArgumentNullException.ThrowIfNull(settings);
 
         if (string.IsNullOrWhiteSpace(settings.BlobStorageConnectionString))
         {
@@ -54,7 +54,7 @@ public class AzureBlobFileService : IFileStoreService
     /// <param name="containerName">The name of the container to look for the file</param>
     /// <param name="fileName">The name of the file to get</param>
     /// <returns>Stream reference to the file.</returns>
-    public async Task<Stream> GetAsync(string containerName, string fileName)
+    public async Task<Stream?> GetAsync(string containerName, string fileName)
     {
         var container = await GetBlobContainerAsync(containerName);
         var blobClient = container.GetBlobClient(fileName);
@@ -160,7 +160,7 @@ public class AzureBlobFileService : IFileStoreService
         await DeleteBlobsAsync(container, blobs);
     }
 
-    private async Task DeleteBlobsAsync(BlobContainerClient container, IEnumerable<BlobItem> blobs)
+    private static async Task DeleteBlobsAsync(BlobContainerClient container, IEnumerable<BlobItem> blobs)
     {
         foreach (var blobItem in blobs)
         {
