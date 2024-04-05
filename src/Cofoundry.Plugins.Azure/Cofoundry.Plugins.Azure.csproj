@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
-    <PackageReference Include="Cofoundry.Domain" Version="0.11.5-dotnet-8-0031" />
+    <PackageReference Include="Cofoundry.Domain" Version="0.12.0" />
   </ItemGroup>
 
 </Project>
